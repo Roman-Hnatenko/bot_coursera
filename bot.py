@@ -28,16 +28,18 @@ def send_welcome(message):
 
 @bot.message_handler(commands=['add'])
 def add(message):
-	bot.send_message(message.chat.id, "Напишите новое место")
+	bot.send_message(message.chat.id, "Напишите название нового места")
 	bot.register_next_step_handler(message, get_place)
 
 
 @bot.message_handler(commands=['list'])
 def get_place_list(chat_id):
 	list_place = r.lrange(chat_id, 0, -1)
-
+	rez_dict = dict()
 	for place in list_place:
-		pass
+		l = r.lrange(place, 0, -1)
+		rez_dict[place] = l
+	print(rez_dict)
 
 
 def get_place(message):
