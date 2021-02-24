@@ -1,10 +1,10 @@
 import telebot
 import redis
 import re
-from token import TOKEN
+from token_ import token_
 
 
-bot = telebot.TeleBot(TOKEN, parse_mode=None)
+bot = telebot.TeleBot(token_, parse_mode=None)
 r = redis.Redis(host='localhost', port=6379, db=0)
 
 text_start = """
