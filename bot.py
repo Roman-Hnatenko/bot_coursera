@@ -1,10 +1,10 @@
 import telebot
 import redis
 import re
+from token import TOKEN
 
 
-token = '1632519088:AAEgTHHPS6bzGGAwKu8PzdfESYAXsQ3nJ6o'
-bot = telebot.TeleBot(token, parse_mode=None)
+bot = telebot.TeleBot(TOKEN, parse_mode=None)
 r = redis.Redis(host='localhost', port=6379, db=0)
 
 text_start = """
@@ -33,13 +33,24 @@ def add(message):
 
 
 @bot.message_handler(commands=['list'])
-def get_place_list(chat_id):
-	list_place = r.lrange(chat_id, 0, -1)
+def get_place_list(message):
+	list_place = r.lrange(message.chat.id, 0, -1)
 	rez_dict = dict()
 	for place in list_place:
 		l = r.lrange(place, 0, -1)
-		rez_dict[place] = l
-	print(rez_dict)
+		rez_dict[place.decode()] = [i.decode() for i in l]
+	list_place = list(rez_dict.keys())
+
+	bot.send_message(message.chat.id, 'Вы планируете побывать в таких местах:' if list_place else 'Вы еще ничего не добавили:)')
+	for place in list_place:
+		bot.send_message(message.chat.id, f'Место: {place}\nДата: {rez_dict[place][1]}')
+		bot.send_photo(message.chat.id, rez_dict[place][0])
+
+
+@bot.message_handler(commands=['reset'])
+def reset(message):
+	r.delete(message.chat.id)
+	bot.send_message(message.chat.id, f'Все записи успешно удалены\nВы никуда не едете:(')
 
 
 def get_place(message):
@@ -50,8 +61,7 @@ def get_place(message):
 
 def get_photo(message, name_location):
 	try:
-		photo_id =  message.photo[len(message.photo) - 1].file_id
-		# bot.send_photo(message.chat.id, f_id)
+		photo_id = message.photo[len(message.photo) - 1].file_id
 
 		bot.send_message(message.chat.id, f"Напишите дату планиремого посещения\nФормат(00-00-0000)")
 		bot.register_next_step_handler(message, get_date, name_location, photo_id)
@@ -68,7 +78,7 @@ def get_date(message, name_location, photo_id):
 		save_data(message.chat.id, name_location, photo_id, date)
 		bot.send_message(message.chat.id, 'Новая локация успешно сохранена!')
 	except Exception as e:
-		bot.send_message(message.chat.id, f"Мне нужна планируема дата в правильном формате(00-00-0000).\n\nПопробуй  еще раз:)")
+		bot.send_message(message.chat.id, f'Мне нужна планируема дата в правильном формате(00-00-0000).\n\nПопробуй  еще раз:)')
 		bot.register_next_step_handler(message, get_date, name_location, photo_id)
 
 
@@ -78,5 +88,3 @@ def send_what_to_do(message):
 
 
 bot.polling()
-# r.rpush(876, 'pasha')
-# print(r.lrange(876, 0, -1)[0].decode())
