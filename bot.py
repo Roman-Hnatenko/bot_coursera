@@ -1,11 +1,12 @@
 import telebot
 import redis
 import re
+import os
 from token_ import token_
-
+REDIS_URL = os.getenv('REDIS_URL')
 
 bot = telebot.TeleBot(token_, parse_mode=None)
-r = redis.Redis(host='localhost', port=6379, db=0)
+r = redis.Redis(REDIS_URL)
 
 text_start = """
 Привет, вот что я умею:
