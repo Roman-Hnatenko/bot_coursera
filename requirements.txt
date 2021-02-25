@@ -1,0 +1,4 @@
+python==3.8.5
+pyTelegramBotAPI==3.7.6
+redis==3.5.3
+requests==2.25.1

@@ -74,7 +74,7 @@ def get_date(message, name_location, photo_id):
 	try:
 		date = re.search(r"\d{2}-\d{2}-\d{4}", message.text)
 		date = date.group(0)
-		print(message.chat.id)
+
 		save_data(message.chat.id, name_location, photo_id, date)
 		bot.send_message(message.chat.id, 'Новая локация успешно сохранена!')
 	except Exception as e:
@@ -88,3 +88,4 @@ def send_what_to_do(message):
 
 
 bot.polling()
+
